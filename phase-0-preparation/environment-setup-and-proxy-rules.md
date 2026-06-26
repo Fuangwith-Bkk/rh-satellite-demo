@@ -189,3 +189,76 @@ sudo satellite-installer --scenario satellite \
 Let's try to login https://satellite.lab.local or https://\<public\_ip>
 
 <figure><img src="../.gitbook/assets/6-login-sat.png" alt=""><figcaption></figcaption></figure>
+
+### 3. Client Compute Fleet Provisioning (Presenter Checklist)
+
+To validate lifecycle environment workflows, content filters, and compliance baseline enforcement later in the demo, two clean target RHEL 9 nodes must be provisioned and isolated alongside the primary Satellite server.
+
+#### 3.1 Managed Client Hardware Specifications
+
+Launch two separate EC2 instances within the same sandbox VPC subnet using the following system profiles:
+
+**1. Development Managed Host (`rhel9-dev`)**
+
+* **Operating System AMI:** Red Hat Enterprise Linux 9 (HVM) — Clean Image
+* **Instance Type:** `t3.small` (2 vCPUs, 2 GiB RAM)
+* **Network Security:** Associated with `satellite-security-group`
+* **Available Zone:** Same AZ with 'satellite.lab.local'
+
+**2. Production Managed Host (`rhel9-prod`)**
+
+* **Operating System AMI:** Red Hat Enterprise Linux 9 (HVM) — Clean Image
+* **Instance Type:** `t3.small` (2 vCPUs, 2 GiB RAM)
+* **Network Security:** Associated with `satellite-security-group`
+* **Available Zone:** Same AZ with 'satellite.lab.local'
+
+<figure><img src="../.gitbook/assets/7-EC2.png" alt=""><figcaption></figcaption></figure>
+
+***
+
+#### 3.2 Client Operating System Identity & AWS RHUI Decoupling
+
+To prepare the clean managed clients, their hostnames must be configured, and their package managers must be fully decoupled from the cloud provider update infrastructure (RHUI).
+
+Run this exact initialization sequence on the client nodes to assign their identities, map network anchors, and execute the isolation playbook:
+
+**Execution Profile: Development Client (`rhel9-dev`)**
+
+<pre class="language-bash"><code class="lang-bash"># 1. Update the local system identity variable
+sdev
+
+# 2. Elevate to root administrative shell to handle file redirection
+sudo -i
+
+# 3. Dynamic identification of private subnet interface IP and local network mapping
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+echo "$PRIVATE_IP rhel9-dev.lab.local rhel9-dev" >> /etc/hosts
+echo "&#x3C;satellite_PRIVATE_IP> satellite.lab.local satellite" >> /etc/hosts
+
+# 4. Quarantine default AWS update tracking mirrors out of the runtime path
+<strong>mkdir -p /etc/yum.repos.d/rhui-bak
+</strong>mv /etc/yum.repos.d/redhat-rhui* /etc/yum.repos.d/rhui-bak/
+
+# 5. Force a complete clear out of the local tracking cache and restart
+dnf clean all
+rm -rf /var/cache/dnf
+reboot
+</code></pre>
+
+repeat this step on `rhel9-prod` server
+
+#### 3.3 Server-Side Fleet Discovery Mapping
+
+To ensure the primary orchestration node can dynamically reach and handle remote task execution across your managed nodes, the primary Satellite host's resolution table must be appended with the client network anchors.
+
+Execute the alignment block on the `sat-server` terminal:
+
+```bash
+# 1. Elevate to root administration privileges
+sudo -i
+
+# 2. Append the managed client network infrastructure coordinates
+echo "<rhel9-dev_PRIVATE_IP> rhel9-dev.lab.local rhel9-dev" >> /etc/hosts
+echo "<rhel9-prod_PRIVATE_IP> rhel9-prod.lab.local rhel9-prod" >> /etc/hosts
+```
+

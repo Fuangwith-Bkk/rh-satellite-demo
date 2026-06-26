@@ -1,0 +1,2 @@
+# OpenSCAP & CIS Benchmark Policies
+

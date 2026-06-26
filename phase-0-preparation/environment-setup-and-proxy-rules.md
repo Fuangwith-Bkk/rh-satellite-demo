@@ -2,7 +2,7 @@
 
 ## Environment Preparation (Phase 0)
 
-This section details the foundational deployment steps required to provision the cloud infrastructure and configure the underlying operating system environment prior to installing Red Hat Satellite 6.19.
+This section details the foundational deployment steps required to provision the cloud infrastructure and configure the underlying operating system environment prior to [installing Red Hat Satellite 6.19](https://docs.redhat.com/en/documentation/red_hat_satellite/6.19/html-single/installing_satellite_server_in_a_connected_network_environment/index).
 
 ***
 
@@ -65,8 +65,127 @@ sudo hostnamectl set-hostname satellite.lab.local
 sudo -i
 
 # 3. Append the static resolution hook to the system hosts table
-echo "127.0.0.1 satellite.lab.local satellite" >> /etc/hosts
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+echo "$PRIVATE_IP satellite.lab.local satellite" >> /etc/hosts
 
 # 4. Cycle system power to apply FQDN changes across all kernel and systemd layers
 reboot
 ```
+
+**Verification Milestone**
+
+Following the system restart loop, verify that the host identity returns the proper domain format:
+
+```
+hostname -f
+# Expected Output: satellite.lab.local
+```
+
+#### 2.2 AWS RHUI Decoupling (Cloud Mirror Purge)
+
+Standard AWS RHEL cloud images are hardcoded to check AWS-managed internal repositories (Red Hat Update Infrastructure - RHUI). To protect against package contamination, repository locks, and update stream cross-talk, these cloud provider configuration configurations must be purged completely:
+
+```
+# 1. Gain root administrative privileges
+sudo -i
+
+# 2. Establish a secure archive backup container directory
+mkdir -p /etc/yum.repos.d/rhui-bak
+
+# 3. Isolate the default cloud-provider repo records out of the runtime path
+mv /etc/yum.repos.d/redhat-rhui* /etc/yum.repos.d/rhui-bak/
+
+# 4. Force a comprehensive clear down of the package manager tracking cache
+dnf clean all
+rm -rf /var/cache/dnf
+```
+
+**Verification Milestone**
+
+To confirm that the package manager is completely isolated and blank, run a inventory repolist check:
+
+```
+dnf repolist
+```
+
+_Expected Output Terminal Messages:_
+
+```
+Updating Subscription Management repositories.
+Unable to read consumer identity
+This system is not registered with an entitlement server. You can use "rhc" or "subscription-manager" to register.
+No repositories available
+```
+
+#### 2.4 Red Hat Cloud Connectivity & CDN Registration
+
+Rather than using legacy, interactive service credentials, the host platform uses **Red Hat Connect (`rhc`)** to securely register the system against a pre-shared Cloud Activation Key via the [Hybrid Cloud Console Registration Assistant](https://console.redhat.com/insights/registration).
+
+<figure><img src="../.gitbook/assets/5-registration-assist.png" alt=""><figcaption></figcaption></figure>
+
+Execute the automation connect command directly from an elevated administrative shell:
+
+```bash
+# 1. Connect the host platform and assign cloud entitlements automatically
+sudo rhc connect --activation-key <YOUR_CLOUD_ACTIVATION_KEY>
+
+# 2. Install the compliance worker engine for remote task orchestration
+sudo dnf install -y rhc-worker-playbook
+```
+
+**Verification Milestone**
+
+Verify that the host can reach the Red Hat Content Delivery Network (CDN) and list the basic enterprise update tracks:
+
+```bash
+sudo dnf repolist
+```
+
+expected output:
+
+```
+Updating Subscription Management repositories.
+repo id                                    repo name
+rhel-9-for-x86_64-appstream-rpms           Red Hat Enterprise Linux 9 for x86_64 - AppStream (RPMs)
+rhel-9-for-x86_64-baseos-rpms              Red Hat Enterprise Linux 9 for x86_64 - BaseOS (RPMs)
+```
+
+#### 2.5 Enabling Satellite Installation Repositories
+
+With the base enterprise channels online, the specific product delivery and maintenance channels required to extract the Satellite 6.19 installer metadata must be enabled via the subscription subsystem.
+
+Execute the channel attachment command:
+
+```bash
+sudo subscription-manager repos \
+  --enable="satellite-6.19-for-rhel-9-x86_64-rpms" \
+  --enable="satellite-maintenance-6.19-for-rhel-9-x86_64-rpms"
+```
+
+#### 2.6 Installing Core Satellite Framework Packages
+
+Once the channels are synchronized, download the core `satellite` metadata installation binaries and underlying system dependencies directly from the Red Hat Content Delivery Network (CDN):
+
+```bash
+sudo dnf install -y satellite
+```
+
+#### 2.7 Platform Installation Execution
+
+With the network layout, operating system parameters, and software tracks verified, launch the non-interactive `satellite-installer` routine. This builds out the embedded PostgreSQL engine, Katello core systems, and web application panels.
+
+Execute the explicit initialization command:
+
+```bash
+sudo satellite-installer --scenario satellite \
+  --foreman-initial-organization "Lab_Org" \
+  --foreman-initial-location "AWS_Region" \
+  --foreman-initial-admin-username admin \
+  --foreman-initial-admin-password "redhat"
+```
+
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Let's try to login https://satellite.lab.local or https://\<public\_ip>
+
+<figure><img src="../.gitbook/assets/6-login-sat.png" alt=""><figcaption></figcaption></figure>

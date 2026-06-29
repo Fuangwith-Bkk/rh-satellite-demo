@@ -9,6 +9,7 @@
 ## Topic 0: Foundations
 
 * [Subscription Manifest Uploads](topic-0-foundations/subscription-manifest-uploads.md)
+* [Configuring Red Hat Lightspeed Client](topic-0-foundations/configuring-red-hat-lightspeed-client.md)
 * [VMware Hypervisor (virt-who)](topic-0-foundations/vmware-hypervisor-virt-who.md)
 
 ## Topic 1: Lifecycle Management

@@ -23,13 +23,14 @@ A custom network security profile must be constructed to open specific ingress p
 * **Security Group Name:** `satellite-security-group`
 * **VPC Association:** Default Sandbox VPC&#x20;
 
-| Type           | Protocol | Port Range | Source      | Description / Purpose                         |
-| -------------- | -------- | ---------- | ----------- | --------------------------------------------- |
-| **SSH**        | TCP      | `22`       | `0.0.0.0/0` | Secure Backend Remote Administration          |
-| **HTTP**       | TCP      | `80`       | `0.0.0.0/0` | Client Registration Bootstrap Script Delivery |
-| **HTTPS**      | TCP      | `443`      | `0.0.0.0/0` | Web Management UI & Client Registration API   |
-| **Custom TCP** | TCP      | `5647`     | `0.0.0.0/0` | Katello Capsule Remote Agent Communication    |
-| **Custom TCP** | TCP      | `9090`     | `0.0.0.0/0` | Cockpit Web Console & OpenSCAP CIS Compliance |
+| Type           | Protocol | Port Range | Source      | Description / Purpose                                        |
+| -------------- | -------- | ---------- | ----------- | ------------------------------------------------------------ |
+| **SSH**        | TCP      | `22`       | `0.0.0.0/0` | Secure Backend Remote Administration                         |
+| **HTTP**       | TCP      | `80`       | `0.0.0.0/0` | Client Registration Bootstrap Script Delivery                |
+| **HTTPS**      | TCP      | `443`      | `0.0.0.0/0` | Web Management UI & Client Registration API                  |
+| **Custom TCP** | TCP      | `5647`     | `0.0.0.0/0` | Katello Capsule Remote Agent Communication                   |
+| **Custom TCP** | TCP      | `9090`     | `0.0.0.0/0` | Cockpit Web Console & OpenSCAP CIS Compliance                |
+| Custom TCP     | TCP      | `24443`    | `0.0.0.0/0` | Local Red Hat Lightspeed / IOP  (Insight On Premise) ingress |
 
 <figure><img src="../.gitbook/assets/3-security-group.png" alt=""><figcaption></figcaption></figure>
 

@@ -15,3 +15,35 @@ Run the registration append switch from your management console:
 ```bash
 sudo satellite-installer --register-with-insights
 ```
+
+### 2. Authenticating Podman Against the Red Hat Registry
+
+Because the localized Lightspeed microservices run as automated systemd container layers, Podman requires explicit image download credentials bound to the installer environment path prior to launching deployment scripts.
+
+Inject your Red Hat portal account verification tokens into the specific core authorization table:
+
+Bash
+
+```
+sudo podman login --authfile /etc/foreman/registry-auth.json registry.redhat.io
+```
+
+### 3. Provisioning the On-Premises Lightspeed Backend
+
+With the storage engine authenticated, execute the structural installation routine to deploy the full generative AI analytics processing layers and message broker loops:
+
+Bash
+
+```
+sudo satellite-installer --enable-iop
+```
+
+### 4. Operational Container Infrastructure Verification
+
+Once the installer finishes compiling the system structures, audit the local Podman engine to guarantee that all runtime microservices are active and processing data normally.
+
+Bash
+
+```
+sudo podman ps --format "table {{.Names}} {{.Status}}"
+```

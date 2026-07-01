@@ -91,3 +91,38 @@ Now that your filter container holds the rule for `1.24*`, you are ready to publ
 <figure><img src="../.gitbook/assets/11-publish.png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../.gitbook/assets/12-promote.png" alt=""><figcaption></figcaption></figure>
+
+**Step 4.4: Upgrading to Version 2.0 (Development Testing Track)**
+
+To establish our agile application tier for validation testing on `rhel9-dev`, we must modify our inclusive configuration filter rules to pull the newer application packages and compile a separate snapshot layer.
+
+1. Click back over to the **Filters** tab inside the `CV_RHEL9_WebStack` dashboard.
+2. Select the `Filter_Nginx_Versions` link to access its granular rules manager ledger.
+3. Under the **Included RPMs** section layout, click the blue **Add RPM rule** button.
+4. Populate the package target parameters to incorporate the modern software track:
+   * RPM name: `nginx`
+   * Architecture: _(Leave blank)_
+   * Version Operator: `Equal to`
+   * Version: `1.26*`
+5. Click **Add rule** to commit the parameter to the filter cache.
+
+<figure><img src="../.gitbook/assets/13-add-rule-2.png" alt=""><figcaption></figcaption></figure>
+
+**Step 4.5: Publishing & Promoting Version 2.0**
+
+With both version lines now indexed inside our filter blueprint, publish a fresh version slice of the view and promote it strictly to the Development lifecycle stream.
+
+1. Navigate back to the **Versions** tab or click the **Publish new version** button at the top right of the workspace area.
+2. Configure the new wizard workflow options:
+   * Description: `Upgrading view to open up Nginx 1.26 package stream for Development testing`
+   * Promote Switch: Toggle to **ON** (Checked).
+3. Under the available promotion paths matrix layout, select **only the checkbox next to Development** (`Library > Development`). Leave the _Production_ box unchecked to completely protect your live production instance baseline.
+4. Click **Next**, review the final parameter summary checklist, and complete the execution task.
+
+<figure><img src="../.gitbook/assets/14-publish-v2.png" alt=""><figcaption></figcaption></figure>
+
+**Verification Milestone**
+
+Open your **Content Views > CV\_RHEL9\_WebStack > Versions** tracker screen. Audit the environment tracking blocks to prove that **Version 1.0** is mapped explicitly to **Production** while **Version 2.0** is concurrently locked to **Development**.
+
+<figure><img src="../.gitbook/assets/15-done-v2.png" alt=""><figcaption></figcaption></figure>

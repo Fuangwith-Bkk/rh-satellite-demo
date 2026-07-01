@@ -48,3 +48,46 @@ With our environments configured, we will create the foundational Content View a
 4. Click Add Repositories to confirm integration.
 
 <figure><img src="../.gitbook/assets/8-add-repo.png" alt=""><figcaption></figcaption></figure>
+
+#### 4. Implementing Content View Version Filters
+
+To fulfill the demo narrative—ensuring `rhel9-prod` safely tracks an isolated, corporate-approved legacy web engine while `rhel9-dev` unlocks cutting-edge features—we construct an Inclusion Filter. This blocks all packages within our custom repository unless they match our explicit version constraints.
+
+**Step 4.1: Create the Filter Container**
+
+1. Inside your `CV_RHEL9_WebStack` dashboard view, navigate to the Filters tab.
+2. Click Create Filter to initialize the wizard modal.
+3. Define the configuration container fields as follows:
+   * Name: `Filter_Nginx_Versions`
+   * Content type: `RPM`
+   * Inclusion Policy: Select the Include filter radio button (allowing only specified packages to pass).
+   * Description: `Version isolation logic for RHEL 9 cloud instance deployment pipelines.`
+4. Click Create filter.
+
+<figure><img src="../.gitbook/assets/9-filter.png" alt=""><figcaption></figcaption></figure>
+
+**Step 4.2: Define the Nginx 1.24 Inclusion Rule**
+
+1. Click on the newly created `Filter_Nginx_Versions` link to open its rules management page.
+2. Under the Included RPMs section, click the blue Add RPM rule button.
+3. Populate the package target parameters to explicitly isolate our initial production baseline:
+   * RPM name: `nginx`
+   * Architecture: _(Leave blank to allow all matching architectures)_
+   * Version Operator: `Equal to`
+   * Version: `1.24*`
+4. Click Add rule to lock the constraint into the view pipeline.
+
+<figure><img src="../.gitbook/assets/10-add-rule.png" alt=""><figcaption></figcaption></figure>
+
+**Step 4.3: Publish & Promoting Version 1.0 (Production)**
+
+Now that your filter container holds the rule for `1.24*`, you are ready to publish Version 1.0 of the Content View!
+
+1. Go back up to the top of the content view page or click the Versions tab.
+2. Click the blue Publish new version button.
+3. Name/Description it something clear like: `Publishing baseline Nginx 1.24 for Production`.
+4. Once published, click Promote next to Version 1.0 and push it directly into your Production Lifecycle Environment.
+
+<figure><img src="../.gitbook/assets/11-publish.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/12-promote.png" alt=""><figcaption></figcaption></figure>
